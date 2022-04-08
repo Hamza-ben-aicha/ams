@@ -17,7 +17,6 @@ const SchemaValidation = Joi.object({
 // Register for entreprise
 exports.register_entreprise = (nom, prenom, telephone, email, password, adress,mobile,contact,web) => {
     return new Promise((resolve, reject) => {
-
         let validation = SchemaValidation.validate({ nom, prenom, telephone, email, password, adress})
         if (validation.error) {
             reject(validation.error.details[0].message)
@@ -56,7 +55,7 @@ exports.register_entreprise = (nom, prenom, telephone, email, password, adress,m
 }
 
 // Register for consultant 
-exports.register_consultant = (nom, prenom, telephone, email, password, adress) => {
+exports.register_consultant = (nom, prenom, telephone, email, password, adress, ) => {
     return new Promise((resolve, reject) => {
 
         let validation = SchemaValidation.validate({ nom, prenom, telephone, email, password, adress })
@@ -78,8 +77,16 @@ exports.register_consultant = (nom, prenom, telephone, email, password, adress) 
                         password: hashedPassord,
                         adress: adress,
                         role: "consultant",
-                    }).then((response) => resolve(response)).catch((err) => reject(err))
-                    // ou  .create(req.body)
+                    }).then((response) =>{
+                        if(response){ 
+                            db.Consultant.create({
+                                disponibilité: true,
+                                UserId:response.id
+                            }).then((user) => resolve({ user:response,disponibilité:user}))
+                        }else{
+                            reject("error for insertion")
+                        }
+                    }).catch((err) => reject(err))
                 })
             }
         })
