@@ -1,6 +1,5 @@
 const express=require('express')
 const route=express.Router()
-const db=require('../models')
 const userController=require('../controllers/userController')
 
 route.post('/register_entreprise',(req,res,next)=>{
@@ -44,4 +43,5 @@ route.delete('/delete_user/:id',(req,res,next)=>{
     .then(user=>res.status(200).json(user))
     .catch((err)=>res.status(400).json({err:err}))
 })
+
 module.exports=route

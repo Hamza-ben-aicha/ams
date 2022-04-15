@@ -18,6 +18,9 @@ module.exports = (sequelize, Datatype) => {
         Entreprise.belongsTo(models.Users,{
             onDelete:"cascade"
         })
+        Entreprise.hasMany(models.Projet,{
+            onDelete:"cascade"
+        })
     }
     return Entreprise 
 }  
