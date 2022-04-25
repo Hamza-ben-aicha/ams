@@ -21,6 +21,9 @@ module.exports = (sequelize, Datatype) => {
         Projet.belongsTo(models.Normes,{  
             onDelete:"cascade"
         })
+        Projet.hasMany(models.ResQuestions,{
+            onDelete:"cascade"
+        }) 
     }
     return Projet 
 }  

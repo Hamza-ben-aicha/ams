@@ -7,6 +7,9 @@ module.exports = (sequelize, Datatype) => {
   })
  
   Normes.associate = models => {
+    Normes.hasMany(models.Articles, {
+      onDelete: "cascade"
+    })
     Normes.hasMany(models.Chapitres, {
       onDelete: "cascade"
     })
