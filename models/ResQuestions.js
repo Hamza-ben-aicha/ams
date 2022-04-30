@@ -5,6 +5,18 @@ module.exports = (sequelize, Datatype) => {
           type:Datatype.STRING,
           allowNull:false
         },
+        evaluation:{
+            type:Datatype.STRING,
+            allowNull:false
+        },
+        observation:{
+            type:Datatype.STRING,
+            allowNull:false
+        },
+        note:{
+            type:Datatype.STRING,
+            allowNull:false
+        },
         // id_article:{
         //     type:Datatype.STRING,
         //     allowNull:false
@@ -13,22 +25,6 @@ module.exports = (sequelize, Datatype) => {
         //     type:Datatype.STRING,
         //     allowNull:false
         // },
-        // id_projet:{
-        //     type:Datatype.STRING,
-        //     allowNull:false
-        // },
-        // evaluation:{
-        //     type:Datatype.STRING,
-        //     allowNull:false
-        // },
-        // observation:{
-        //     type:Datatype.STRING,
-        //     allowNull:false
-        // },
-        // note:{
-        //     type:Datatype.STRING,
-        //     allowNull:false
-        // }
     })
     ResQuestions.associate=models=>{
         ResQuestions.belongsTo(models.Projet,{

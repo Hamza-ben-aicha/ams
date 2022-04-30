@@ -9,6 +9,8 @@ const SchemaValidation = Joi.object({
   EntrepriseId: Joi.number().required(),
   NormeId: Joi.number().required(),
 })
+
+
 // Register for projet
 exports.ajoute_projet = (date_deb, date_fin, ConsultantId, EntrepriseId, NormeId) => {
   return new Promise((resolve, reject) => {
@@ -22,11 +24,39 @@ exports.ajoute_projet = (date_deb, date_fin, ConsultantId, EntrepriseId, NormeId
         ConsultantId: ConsultantId,
         EntrepriseId: EntrepriseId,
         NormeId: NormeId,
-      }).then((response) => resolve(response))
+      }).then((response) => {
+        db.sequelize
+          .query(
+            `insert into resquestions(id_question) select id from questions where ArticleId in (select a.id from (articles a ,chapitres c, normes n) where a.ChapitreId=c.id and n.id=${response.NormeId} and c.NormeId=n.id)`
+          )
+          .then((res_q) => {
+            if (!res_q) {
+              resolve("erreur")
+            } else {
+              db.ResQuestions.findAll({ where: { ProjetId: null } })
+                .then((aj_prj_q) => {
+                  if (!aj_prj_q) {
+                    resolve("erreur d'ajoute")
+                  } else {
+                    db.sequelize
+                      .query(
+                        `UPDATE resquestions SET ProjetId=${response.id} where ProjetId IS NULL `
+                      )
+                      .then((aj_y_n) => {
+                        resolve(aj_y_n)
+                      })
+                  }
+
+                })
+            }
+
+          })
+      })
         .catch((err) => reject(err))
     }
   })
 }
+
 
 exports.getbyId_projet = (id) => {
   return new Promise((resolve, reject) => {
@@ -75,3 +105,4 @@ exports.getbyId_projet = (id) => {
     });
   });
 }
+
