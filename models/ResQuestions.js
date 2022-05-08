@@ -29,6 +29,9 @@ module.exports = (sequelize, Datatype) => {
     ResQuestions.associate=models=>{
         ResQuestions.belongsTo(models.Projet,{
             onDelete:"cascade"
+        }),
+        ResQuestions.belongsTo(models.Chapitres,{
+            onDelete:"cascade"
         })
         
     }

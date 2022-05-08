@@ -10,7 +10,6 @@ const SchemaValidation = Joi.object({
   NormeId: Joi.number().required(),
 })
 
-
 // Register for projet
 exports.ajoute_projet = (date_deb, date_fin, ConsultantId, EntrepriseId, NormeId) => {
   return new Promise((resolve, reject) => {
@@ -38,25 +37,36 @@ exports.ajoute_projet = (date_deb, date_fin, ConsultantId, EntrepriseId, NormeId
                   if (!aj_prj_q) {
                     resolve("erreur d'ajoute")
                   } else {
+
                     db.sequelize
                       .query(
                         `UPDATE resquestions SET ProjetId=${response.id} where ProjetId IS NULL `
                       )
                       .then((aj_y_n) => {
-                        resolve(aj_y_n)
-                      })
-                  }
+                        // if (!aj_y_n) {
+                        //   resolve("erreur d'ajoute")
+                        // } else {
 
+                        // }
+                      })
+                    aj_prj_q.map((item) => {
+                      db.sequelize
+                        .query(
+                          `update db_ams.resquestions set ChapitreId = (select id from db_ams.chapitres where id = (select ChapitreId from db_ams.articles where id = (select ArticleId from db_ams.questions where id = ${item.id_question}))) where ProjetId = ${response.id} and id_question = ${item.id_question}`
+                        )
+                        .then((reschap) => {
+                          resolve(item.id_question)
+                        })
+                    })
+                  }
                 })
             }
-
           })
       })
         .catch((err) => reject(err))
     }
   })
 }
-
 
 exports.getbyId_projet = (id) => {
   return new Promise((resolve, reject) => {

@@ -15,6 +15,8 @@ route.get('/getbyId_projet/:id', (req, res, next) => {
         .catch((err) => res.status(400).json({ err: err }))
 })
 
+
+// modifie resulta de projet
 route.patch('/update_res', (req, res, next) => {
     const payload =
     {
@@ -30,6 +32,19 @@ route.patch('/update_res', (req, res, next) => {
     res_Controller.update_res(payload.table_objet)
         .then(response => res.status(200).json(response))
         .catch((err) => res.status(400).json(err))
+})
+
+
+// get les resulta des question d'un projet
+route.get('/res_chap/:id', (req, res, next) => {
+
+   
+
+        const table_objet_id =  req.body.table_objet_id
+  
+    res_Controller.res_chap(table_objet_id, req.params.id)
+        .then(response => res.status(200).json(response))
+        .catch((err) => res.status(400).json({ err: err }))
 })
 
 module.exports = route 
