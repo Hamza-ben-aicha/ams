@@ -94,28 +94,78 @@ exports.register_consultant = (nom, prenom, telephone, email, password, adress, 
     })
 }
 
-// login admin or consultant or entreprise 
-const PrivateKey = "eijnekv,evkznjzkveffznzivnz,feizivnafjafnmjf"
+
+
+const PrivateKey = "eijnekvevkznjzkveffznzivnzfeizivnafjafnmjf";
 exports.login = (email, password) => {
-    return new Promise((resolve, reject) => {
-        db.Users.findOne({ where: { email: email } }).then(user => {
-            if (!user) {
-                reject("invalid email and password")
-            } else {
-                bcrypt.compare(password, user.password).then(same => {
-                    if (same) {
-                        let token = jwt.sign({ id: user.id, username: user.id, role: "userrole" }, PrivateKey, {
-                            expiresIn: "24h"
-                        })
-                        resolve(token)
-                    } else {
-                        reject("invalid email and password")
-                    }
-                })
+  return new Promise((resolve, reject) => {
+    db.Users.findOne({ where: { email: email } }).then((user) => {
+      if (!user) {
+        reject("invalid email");
+      } else {
+        bcrypt.compare(password, user.password).then((same) => {
+          if (same) {
+            let token = jwt.sign(
+              { id: user.id, username: user.email, role: user.role },
+                PrivateKey,
+              {
+                expiresIn: "24h",
+              }
+            );
+            const id = user.id;
+            const role = user.role;
+            switch (role) {
+              case "consultant":
+                db.Consultant.findOne({ where: { UserId: id } }).then(
+                  (consultant) => {
+                    user = { ...user.dataValues, subInfo: consultant };
+                    resolve({ user, token });
+                  }
+                );
+              case "entreprise":
+                db.Entreprise.findOne({ where: { UserId: id } }).then(
+                  (entreprise) => {
+                    user = { ...user.dataValues, subInfo: entreprise };
+                    resolve({ user, token });
+                  }
+                );
+              case "admin":
+                db.Admin.findOne({ where: { UserId: id } }).then((admin) => {
+                  user = { ...user.dataValues, subInfo: admin };
+                  resolve({ user, token });
+                });
             }
-        })
-    })
-}
+          } else {
+            reject("invalid password");
+          }
+        });
+      }
+    });
+  });
+};
+
+// login admin or consultant or entreprise 
+// const PrivateKey = "eijnekv,evkznjzkveffznzivnz,feizivnafjafnmjf"
+// exports.login = (email, password) => {
+//     return new Promise((resolve, reject) => {
+//         db.Users.findOne({ where: { email: email } }).then(user => {
+//             if (!user) {
+//                 reject("invalid email and password")
+//             } else {
+//                 bcrypt.compare(password, user.password).then(same => {
+//                     if (same) {
+//                         let token = jwt.sign({ id: user.id, username: user.id, role: "userrole" }, PrivateKey, {
+//                             expiresIn: "24h"
+//                         })
+//                         resolve(token)
+//                     } else {
+//                         reject("invalid email and password")
+//                     }
+//                 })
+//             }
+//         })
+//     })
+// }
 // get user by id 
 exports.getbyId_user = (id) => {
     return new Promise((resolve, reject) => {
