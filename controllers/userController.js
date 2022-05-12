@@ -2,6 +2,7 @@ const db = require('../models')
 const bcrypt = require('bcrypt')
 const Joi = require('joi')
 const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
 const SchemaValidation = Joi.object({
     nom: Joi.string().min(3).max(30).required(),
@@ -10,14 +11,15 @@ const SchemaValidation = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
     adress: Joi.string().required(),
-    mobile:Joi.number().min(11111111).max(99999999),
-    contact:Joi.string(),
-    web:Joi.string()
+    mobile: Joi.number().min(11111111).max(99999999),
+    contact: Joi.string(),
+    web: Joi.string()
 })
+
 // Register for entreprise
-exports.register_entreprise = (nom, prenom, telephone, email, password, adress,mobile,contact,web) => {
+exports.register_entreprise = (nom, prenom, telephone, email, password, adress, mobile, contact, web) => {
     return new Promise((resolve, reject) => {
-        let validation = SchemaValidation.validate({ nom, prenom, telephone, email, password, adress})
+        let validation = SchemaValidation.validate({ nom, prenom, telephone, email, password, adress })
         if (validation.error) {
             reject(validation.error.details[0].message)
         }
@@ -36,14 +38,14 @@ exports.register_entreprise = (nom, prenom, telephone, email, password, adress,m
                         adress: adress,
                         role: "entreprise",
                     }).then((response) => {
-                        if(response){
+                        if (response) {
                             db.Entreprise.create({
                                 mobile: mobile,
                                 contact: contact,
                                 web: web,
                                 UserId: response.id,
-                            }).then((user) => resolve({ user:response,contact:user}))
-                        }else{
+                            }).then((user) => resolve({ user: response, contact: user }))
+                        } else {
                             reject("error for insertion")
                         }
                     }).catch((err) => reject(err))
@@ -55,7 +57,7 @@ exports.register_entreprise = (nom, prenom, telephone, email, password, adress,m
 }
 
 // Register for consultant 
-exports.register_consultant = (nom, prenom, telephone, email, password, adress, ) => {
+exports.register_consultant = (nom, prenom, telephone, email, password, adress,) => {
     return new Promise((resolve, reject) => {
 
         let validation = SchemaValidation.validate({ nom, prenom, telephone, email, password, adress })
@@ -77,13 +79,13 @@ exports.register_consultant = (nom, prenom, telephone, email, password, adress, 
                         password: hashedPassord,
                         adress: adress,
                         role: "consultant",
-                    }).then((response) =>{
-                        if(response){ 
+                    }).then((response) => {
+                        if (response) {
                             db.Consultant.create({
                                 disponibilité: true,
-                                UserId:response.id
-                            }).then((user) => resolve({ user:response,disponibilité:user}))
-                        }else{
+                                UserId: response.id
+                            }).then((user) => resolve({ user: response, disponibilité: user }))
+                        } else {
                             reject("error for insertion")
                         }
                     }).catch((err) => reject(err))
@@ -94,54 +96,53 @@ exports.register_consultant = (nom, prenom, telephone, email, password, adress, 
     })
 }
 
+const PrivateKey = process.env.PRIVETKEY
 
-
-const PrivateKey = "eijnekvevkznjzkveffznzivnzfeizivnafjafnmjf";
 exports.login = (email, password) => {
-  return new Promise((resolve, reject) => {
-    db.Users.findOne({ where: { email: email } }).then((user) => {
-      if (!user) {
-        reject("invalid email");
-      } else {
-        bcrypt.compare(password, user.password).then((same) => {
-          if (same) {
-            let token = jwt.sign(
-              { id: user.id, username: user.email, role: user.role },
-                PrivateKey,
-              {
-                expiresIn: "24h",
-              }
-            );
-            const id = user.id;
-            const role = user.role;
-            switch (role) {
-              case "consultant":
-                db.Consultant.findOne({ where: { UserId: id } }).then(
-                  (consultant) => {
-                    user = { ...user.dataValues, subInfo: consultant };
-                    resolve({ user, token });
-                  }
-                );
-              case "entreprise":
-                db.Entreprise.findOne({ where: { UserId: id } }).then(
-                  (entreprise) => {
-                    user = { ...user.dataValues, subInfo: entreprise };
-                    resolve({ user, token });
-                  }
-                );
-              case "admin":
-                db.Admin.findOne({ where: { UserId: id } }).then((admin) => {
-                  user = { ...user.dataValues, subInfo: admin };
-                  resolve({ user, token });
+    return new Promise((resolve, reject) => {
+        db.Users.findOne({ where: { email: email } }).then((user) => {
+            if (!user) {
+                reject("invalid email");
+            } else {
+                bcrypt.compare(password, user.password).then((same) => {
+                    if (same) {
+                        let token = jwt.sign(
+                            { id: user.id, username: user.email, role: user.role },
+                            PrivateKey,
+                            {
+                                expiresIn: "24h",
+                            }
+                        );
+                        const id = user.id;
+                        const role = user.role;
+                        switch (role) {
+                            case "consultant":
+                                db.Consultant.findOne({ where: { UserId: id } }).then(
+                                    (consultant) => {
+                                        user = { ...user.dataValues, subInfo: consultant };
+                                        resolve({ user, token });
+                                    }
+                                );
+                            case "entreprise":
+                                db.Entreprise.findOne({ where: { UserId: id } }).then(
+                                    (entreprise) => {
+                                        user = { ...user.dataValues, subInfo: entreprise };
+                                        resolve({ user, token });
+                                    }
+                                );
+                            case "admin":
+                                db.Admin.findOne({ where: { UserId: id } }).then((admin) => {
+                                    user = { ...user.dataValues, subInfo: admin };
+                                    resolve({ user, token });
+                                });
+                        }
+                    } else {
+                        reject("invalid password");
+                    }
                 });
             }
-          } else {
-            reject("invalid password");
-          }
         });
-      }
     });
-  });
 };
 
 // login admin or consultant or entreprise 
@@ -192,6 +193,33 @@ exports.getAll_users = () => {
     })
 }
 
+// get All consultant
+exports.getAll_consultant = () => {
+    return new Promise((resolve, reject) => {
+        db.Users.findAll({ where: { role: "consultant" } }).then(users => {
+            if (!users) {
+                reject("aucun users")
+            } else {
+                resolve(users)
+            }
+        })
+    })
+}
+
+// get All entreprise
+exports.getAll_entreprise = () => {
+    return new Promise((resolve, reject) => {
+        db.Users.findAll({ where: { role: "entreprise" } }).then(users => {
+            // console.log(users);
+            if (!users) {
+                reject("aucun users")
+            } else {
+                resolve(users)
+            }
+        })
+    })
+}
+
 // update user 
 exports.update_user = (id, nom, prenom, telephone, email, password, adress) => {
     return new Promise((resolve, reject) => {
@@ -218,8 +246,8 @@ exports.update_user = (id, nom, prenom, telephone, email, password, adress) => {
                     }).catch((err) => reject(err))
                 })
             } else if (doc != 0) {
-                db.Users.findOne({ where: { id: id } }).then(user => {        
-                    if(user.email == email) {
+                db.Users.findOne({ where: { id: id } }).then(user => {
+                    if (user.email == email) {
                         bcrypt.hash(password, 10).then(hashedPassord => {
                             db.Users.update({
                                 nom: nom,

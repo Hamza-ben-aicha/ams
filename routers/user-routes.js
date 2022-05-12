@@ -26,6 +26,18 @@ route.get('/getAll',(req,res,next)=>{
     .catch((err)=>res.status(400).json({err:err}))
 })
 
+route.get('/getAll_consultant',(req,res,next)=>{
+    userController.getAll_consultant()
+    .then(users=>res.status(200).json(users))
+    .catch((err)=>res.status(400).json({err:err}))
+})
+
+route.get('/getAll_entreprise',(req,res,next)=>{
+    userController.getAll_entreprise()
+    .then(users=>res.status(200).json(users))
+    .catch((err)=>res.status(400).json({err:err}))
+})
+
 route.get('/getbyId/:id',(req,res,next)=>{
     userController.getbyId_user(req.params.id)
     .then(user=>res.status(200).json(user))
