@@ -13,13 +13,13 @@ module.exports = (sequelize, Datatype) => {
     
     Projet.associate=models=>{
         Projet.belongsTo(models.Consultant,{
-            onDelete:"cascade"
+            // onDelete:"cascade"
         })
         Projet.belongsTo(models.Entreprise,{   
-            onDelete:"cascade"
+            // onDelete:"cascade"
         })
         Projet.belongsTo(models.Normes,{  
-            onDelete:"cascade"
+            // onDelete:"cascade"
         })
         Projet.hasMany(models.ResQuestions,{
             onDelete:"cascade"

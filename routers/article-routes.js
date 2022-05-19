@@ -20,6 +20,12 @@ route.get('/getbyId_article/:id',(req,res,next)=>{
     .catch((err)=>res.status(400).json({err:err}))
 })
 
+route.get('/getarticle_byIdchapitre/:id',(req,res,next)=>{
+    article_Controller.getarticle_byIdchapitre(req.params.id)
+    .then(response=>res.status(200).json(response))
+    .catch((err)=>res.status(400).json({err:err}))
+})
+
 route.patch('/update_article/:id',(req,res,next)=>{
     article_Controller.update_article(req.params.id,req.body.Articles, req.body.ChapitreId)   
     .then(response=>res.status(200).json(response))

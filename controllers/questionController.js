@@ -42,6 +42,19 @@ exports.getbyId_question = (id) => {
     })
 }
 
+// get Question by id article
+exports.getquestion_byIdarticle = (id) => {
+    return new Promise((resolve, reject) => {
+        db.Questions.findAll({ where: { ArticleId: id } }).then(question => {
+            if (!question) {
+                reject("aucun question")
+            } else {
+                resolve(question)
+            }
+        })
+    })
+}
+
 // get All Questions
 exports.getAll_questions = () => {
     return new Promise((resolve, reject) => {

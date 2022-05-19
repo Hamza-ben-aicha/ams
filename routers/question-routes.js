@@ -21,6 +21,12 @@ route.get('/getbyId_question/:id',(req,res,next)=>{
     .catch((err)=>res.status(400).json({err:err}))
 })
 
+route.get('/getquestion_byIdarticle/:id',(req,res,next)=>{
+    question_Controller.getquestion_byIdarticle(req.params.id)
+    .then(response=>res.status(200).json(response))
+    .catch((err)=>res.status(400).json({err:err}))
+})
+
 route.patch('/update_question/:id',(req,res,next)=>{
     question_Controller.update_question(req.params.id,req.body.Questions, req.body.ArticleId)  
     .then(response=>res.status(200).json(response))

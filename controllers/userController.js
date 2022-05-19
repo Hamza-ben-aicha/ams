@@ -5,8 +5,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 const SchemaValidation = Joi.object({
-    nom: Joi.string().min(3).max(30).required(),
-    prenom: Joi.string().min(3).max(30).required(),
+    username: Joi.string().min(3).max(30).required(),
     telephone: Joi.number().min(11111111).max(99999999).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
@@ -17,12 +16,14 @@ const SchemaValidation = Joi.object({
 })
 
 // Register for entreprise
-exports.register_entreprise = (nom, prenom, telephone, email, password, adress, mobile, contact, web) => {
+exports.register_entreprise = (username, telephone, email, password, adress, mobile, contact, web) => {
     return new Promise((resolve, reject) => {
-        let validation = SchemaValidation.validate({ nom, prenom, telephone, email, password, adress })
+        let validation = SchemaValidation.validate({ username, telephone, email, password, adress })
         if (validation.error) {
             reject(validation.error.details[0].message)
-        }
+        }else{
+
+        
         db.Users.count({ where: { email: email } }).then(doc => {
             if (doc != 0) {
                 reject("This email is used")
@@ -30,8 +31,7 @@ exports.register_entreprise = (nom, prenom, telephone, email, password, adress, 
             else {
                 bcrypt.hash(password, 10).then(hashedPassord => {
                     db.Users.create({
-                        nom: nom,
-                        prenom: prenom,
+                        username: username,
                         telephone: telephone,
                         email: email,
                         password: hashedPassord,
@@ -52,46 +52,46 @@ exports.register_entreprise = (nom, prenom, telephone, email, password, adress, 
                 })
             }
         })
-
+    }
     })
 }
 
 // Register for consultant 
-exports.register_consultant = (nom, prenom, telephone, email, password, adress,) => {
+exports.register_consultant = (username, telephone, email, password, adress,) => {
     return new Promise((resolve, reject) => {
 
-        let validation = SchemaValidation.validate({ nom, prenom, telephone, email, password, adress })
+        let validation = SchemaValidation.validate({ username, telephone, email, password, adress })
         if (validation.error) {
             reject(validation.error.details[0].message)
         }
-
-        db.Users.count({ where: { email: email } }).then(doc => {
-            if (doc != 0) {
-                reject("This email is used")
-            }
-            else {
-                bcrypt.hash(password, 10).then(hashedPassord => {
-                    db.Users.create({
-                        nom: nom,
-                        prenom: prenom,
-                        telephone: telephone,
-                        email: email,
-                        password: hashedPassord,
-                        adress: adress,
-                        role: "consultant",
-                    }).then((response) => {
-                        if (response) {
-                            db.Consultant.create({
-                                disponibilité: true,
-                                UserId: response.id
-                            }).then((user) => resolve({ user: response, disponibilité: user }))
-                        } else {
-                            reject("error for insertion")
-                        }
-                    }).catch((err) => reject(err))
-                })
-            }
-        })
+        else {
+            db.Users.count({ where: { email: email } }).then(doc => {
+                if (doc != 0) {
+                    reject("This email is used")
+                }
+                else {
+                    bcrypt.hash(password, 10).then(hashedPassord => {
+                        db.Users.create({
+                            username: username,
+                            telephone: telephone,
+                            email: email,
+                            password: hashedPassord,
+                            adress: adress,
+                            role: "consultant",
+                        }).then((response) => {
+                            if (response) {
+                                db.Consultant.create({
+                                    disponibilité: true,
+                                    UserId: response.id
+                                }).then((user) => resolve({ user: response, disponibilité: user }))
+                            } else {
+                                reject("error for insertion")
+                            }
+                        }).catch((err) => reject(err))
+                    })
+                }
+            })
+        }
 
     })
 }
@@ -168,14 +168,29 @@ exports.login = (email, password) => {
 //     })
 // }
 // get user by id 
-exports.getbyId_user = (id) => {
+exports.getbyId_consultant = (id) => {
     return new Promise((resolve, reject) => {
-        db.Users.findOne({ where: { id: id } }).then(user => {
+        db.Users.findOne({ where: { id: id, role: "consultant" } }).then(user => {
             if (!user) {
                 reject("aucun user")
             } else {
                 resolve(user)
             }
+        })
+    })
+}
+
+exports.getbyId_entreprise = (id) => {
+    return new Promise((resolve, reject) => {
+        db.Users.findOne({ where: { id: id, role: "entreprise" } }).then(user => {
+            db.Entreprise.findOne({ where: { UserId: id } }).then(user_c => {
+                if (!user_c) {
+                    reject("aucun user")
+                } else {
+                    user = { ...user.dataValues, subInfo: user_c };
+                    resolve(user);
+                }
+            })
         })
     })
 }
@@ -221,9 +236,9 @@ exports.getAll_entreprise = () => {
 }
 
 // update user 
-exports.update_user = (id, nom, prenom, telephone, email, password, adress) => {
+exports.update_user = (id, username, telephone, email, password, adress) => {
     return new Promise((resolve, reject) => {
-        let valide = SchemaValidation.validate({ nom, prenom, telephone, email, password, adress })
+        let valide = SchemaValidation.validate({ username, telephone, email, password, adress })
         if (valide.error) {
             reject(valide.error.details[0].message)
         }
@@ -231,8 +246,7 @@ exports.update_user = (id, nom, prenom, telephone, email, password, adress) => {
             if (doc == 0) {
                 bcrypt.hash(password, 10).then(hashedPassord => {
                     db.Users.update({
-                        nom: nom,
-                        prenom: prenom,
+                        username: username,
                         telephone: telephone,
                         email: email,
                         password: hashedPassord,
@@ -250,8 +264,7 @@ exports.update_user = (id, nom, prenom, telephone, email, password, adress) => {
                     if (user.email == email) {
                         bcrypt.hash(password, 10).then(hashedPassord => {
                             db.Users.update({
-                                nom: nom,
-                                prenom: prenom,
+                                username: username,
                                 telephone: telephone,
                                 email: email,
                                 password: hashedPassord,

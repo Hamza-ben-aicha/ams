@@ -42,6 +42,19 @@ exports.getbyId_chapitre = (id) => {
     })
 }
 
+// getby_idnorme
+exports.getchp_byidnorme= (id) => {
+    return new Promise((resolve, reject) => {
+        db.Chapitres.findAll({ where: { NormeId: id } }).then(chapitre => {
+            if (!chapitre) {
+                reject("aucun chapitre")
+            } else {
+                resolve(chapitre)
+            }
+        })
+    })
+}
+
 // get All chapitres
 exports.getAll_chapitres = () => {
     return new Promise((resolve, reject) => {

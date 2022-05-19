@@ -20,6 +20,12 @@ route.get('/getbyId_chapitre/:id',(req,res,next)=>{
     .catch((err)=>res.status(400).json({err:err}))
 })
 
+route.get('/getchp_byidnorme/:id',(req,res,next)=>{
+    chapitre_Controller.getchp_byidnorme(req.params.id)
+    .then(response=>res.status(200).json(response))
+    .catch((err)=>res.status(400).json({err:err}))
+})
+
 route.patch('/update_chapitre/:id',(req,res,next)=>{
     chapitre_Controller.update_chapitre(req.params.id,req.body.Chapitres,req.body.NormeId)  
     .then(response=>res.status(200).json(response))

@@ -44,6 +44,19 @@ exports.getbyId_article = (id) => {
     })
 }
 
+// get article by id chapitre 
+exports.getarticle_byIdchapitre = (id) => {
+    return new Promise((resolve, reject) => {
+        db.Articles.findAll({ where: { ChapitreId: id } }).then(article => {
+            if (!article) {
+                reject("aucun Article")
+            } else {
+                resolve(article)
+            }
+        })
+    })
+}
+
 // get All articles
 exports.getAll_articles = () => {
     return new Promise((resolve, reject) => {
