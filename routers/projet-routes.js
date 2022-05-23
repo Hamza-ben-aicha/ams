@@ -15,6 +15,13 @@ route.get('/getbyId_projet/:id', (req, res, next) => {
         .catch((err) => res.status(400).json({ err: err }))
 })
 
+route.get('/get_projet', (req, res, next) => {
+    projet_Controller.get_projet()
+        .then(response => res.status(200).json(response))
+        .catch((err) => res.status(400).json({ err: err }))
+})
+
+route.get("/getPC/:id", projet_Controller.getProjectByIdC);
 
 // modifie resulta de projet
 route.patch('/update_res', (req, res, next) => {

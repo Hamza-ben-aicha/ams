@@ -68,6 +68,35 @@ exports.ajoute_projet = (date_deb, date_fin, ConsultantId, EntrepriseId, NormeId
   })
 }
 
+exports.get_projet = () => {
+  return new Promise((resolve, reject) => {
+    db.Projet.findAll().then((projet) => {
+      if (!projet) {
+        reject("aucun projet");
+      } else {
+        // resolve(projet)
+
+        db.sequelize
+        .query(
+          `select norme from normes where id=${projet.NormeId}`
+        )
+        .then((norme) => {
+            
+                resolve(norme)
+                //     db.Chapitres.findAll({ where: { NormeId: projet.NormeId } }).then(
+                //       (chapitre) => {
+                //         if (!chapitre) {
+                //           reject("aucun chapitre");
+                //         } else {
+                //         }
+                //       }
+                //     );
+        });
+      }
+    });
+  });
+}
+
 exports.getbyId_projet = (id) => {
   return new Promise((resolve, reject) => {
     db.Projet.findOne({ where: { id: id } }).then((projet) => {
@@ -116,3 +145,46 @@ exports.getbyId_projet = (id) => {
   });
 }
 
+
+const oneEntre = async (id) => {
+  const variable = await db.Users.findOne({ where: { id: id } }).then((res) => {
+    return res?.username;
+  });
+  return variable;
+};
+
+const oneNorme = async (id) => {
+  const variable = await db.Normes.findOne({ where: { id: id } }).then((result) => {
+    return result.norme
+  })
+  return variable;
+}
+// get projet by id consultant
+
+exports.getProjectByIdC = async (req, res, next) => {
+  try {
+    const projects = await db.Projet.findAll({
+      where: { ConsultantId: req.params.id },
+    }).then((result) => {
+      if (result.length == 0) {
+        res.status(400).json({ message: "no Project found for that consultant" });
+      } else {
+        return result;
+      }
+    });
+    let EntrepriseNames = [];
+    let Normes = [];
+    let index = 0;
+    projects.forEach(async (element) => {
+      EntrepriseNames.push(await oneEntre(element.EntrepriseId));
+      Normes.push(await oneNorme(element.NormeId))
+      if (index == projects.length - 1) {
+        res.json({ projects, EntrepriseNames, Normes });
+      }
+      index++;
+    })
+
+
+  } catch (error) {
+  }
+};

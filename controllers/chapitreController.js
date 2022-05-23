@@ -68,6 +68,8 @@ exports.getAll_chapitres = () => {
     })
 }
 
+
+
 // update chapitre 
 exports.update_chapitre = (id, Chapitres, NormeId) => {
     return new Promise((resolve, reject) => {
